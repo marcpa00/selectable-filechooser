@@ -9,8 +9,6 @@ import javax.swing.*;
 
 class SelectableFileChooser {
 
-	
-
 	GriffonApplication app
 	boolean chooseDirOnly = false
 	boolean useNativeDialog 
@@ -55,14 +53,14 @@ class SelectableFileChooser {
 	public FileChooser(GriffonApplication app, JPanel panel) {
 		this.app = app
 		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
-		this.useNativeDialog = this.app.config.nativeFileDialog.file
+		this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
 		this.fileChooser = createFileChooser(this.useNativeDialog)
 	}
 
 	public FileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
 		this.app = app
 		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
-		this.useNativeDialog = dirOnly ? this.app.config.nativeFileDialog.directory : this.app.config.nativeFileDialog.file
+		this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
 		this.fileChooser = createFileChooser(this.useNativeDialog)
 
 		if (dirOnly) {
