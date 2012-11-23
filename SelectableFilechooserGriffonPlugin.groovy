@@ -8,10 +8,10 @@ class SelectableFilechooserGriffonPlugin {
     // resources that are included in plugin packaging
     List pluginIncludes = []
     // the plugin license
-    String license = '<UNKNOWN>'
+    String license = 'Apache Software License 2.0'
     // Toolkit compatibility. No value means compatible with all
     // Valid values are: swing, javafx, swt, pivot, qt
-    List toolkits = []
+    List toolkits = [swing]
     // Platform compatibility. No value means compatible with all
     // Valid values are:
     // linux, linux64, windows, windows64, macosx, macosx64, solaris
@@ -27,11 +27,14 @@ class SelectableFilechooserGriffonPlugin {
             email: 'marcpa@mac.com'
         ]
     ]
-    String title = 'Plugin summary/headline'
+    String title = 'Use one facade (JFileChooser-like) and select native AWT or Swing JFileChooser file dialog from a config switch.'
     // accepts Markdown syntax. See http://daringfireball.net/projects/markdown/ for details
     String description = '''
-SelectableFilechooser : Choose to use the native (AWT-based) or Swing open file widget according to platform.
+SelectableFilechooser : Choose to use the native (AWT-based) or Swing open file widget according to a config variable that can be set according to platform.
 When native is choosen, a java.awt.FileDialog is used, otherwise, javax.swing.FileChooser.
+
+The API of this plugin is roughly aligned with Swing's JFileChooser : not all of JFileChooser API is implemented but the way to use a SelectableFilechooser is
+similar to JFileChooser (and thus *not* similar to a java.awt.FileDialog).
 
 Usage
 ----
