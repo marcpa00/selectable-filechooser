@@ -7,7 +7,7 @@ import griffon.swing.WindowManager
 import java.awt.*
 import javax.swing.*;
 
-class SelectableFileChooser {
+public class SelectableFileChooser {
 
 	GriffonApplication app
 	boolean chooseDirOnly = false
@@ -49,15 +49,31 @@ class SelectableFileChooser {
 		}
 		this.fileChooser
 	}
-		
-	public FileChooser(GriffonApplication app, JPanel panel) {
+
+    public void configure () {
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(this.useNativeDialog)
+    }
+
+    public SelectableFileChooser() {
+    }
+
+    public SelectableFileChooser(GriffonApplication app, JFrame frame) {
+        this.app = app
+        this.frame = frame
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(this.useNativeDialog)
+    }
+
+
+	public SelectableFileChooser(GriffonApplication app, JPanel panel) {
 		this.app = app
 		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
 		this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
 		this.fileChooser = createFileChooser(this.useNativeDialog)
 	}
 
-	public FileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
+	public SelectableFileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
 		this.app = app
 		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
 		this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
