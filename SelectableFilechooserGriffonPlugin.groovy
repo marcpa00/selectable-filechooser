@@ -11,7 +11,7 @@ class SelectableFilechooserGriffonPlugin {
     String license = 'Apache Software License 2.0'
     // Toolkit compatibility. No value means compatible with all
     // Valid values are: swing, javafx, swt, pivot, qt
-    List toolkits = [swing]
+    List toolkits = ['swing']
     // Platform compatibility. No value means compatible with all
     // Valid values are:
     // linux, linux64, windows, windows64, macosx, macosx64, solaris
@@ -48,7 +48,6 @@ app.config.selectableFileChooser.useNative.directory = false
 
 // In a view script, with a panel child of application into variable mainPanel:
 myFileChooser = new SelectableFileChooser(app, mainPanel)
-myFileChooser.chooseFile("/Users")
 myDirChooser = new SelectableFileChooser(app, mainPanel, true)
 
 ...
