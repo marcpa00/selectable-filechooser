@@ -5,8 +5,18 @@ import griffon.util.GriffonApplicationUtils
 import griffon.swing.WindowManager
  
 import java.awt.*
-import javax.swing.*;
+import javax.swing.*
+import javax.swing.filechooser.FileSystemView;
 
+/**
+ * A SelectableFileChooser is somewhat similar to a Swing JFileChooser API-wise but can possibly be implemented with
+ * a native-backed AWT FileDialog widget.  Selection between native and Swing is through griffon's app.config object
+ * of running application.
+ * The config of plugin have default values for selection of native vs Swing according to the operating platform.
+ *
+ * Basically, where one used a JFileChooser constructor before, one can use a ca.marcpa.SelectableFileChooser constructor.
+ *
+ */
 public class SelectableFileChooser {
 
 	GriffonApplication app
@@ -22,8 +32,120 @@ public class SelectableFileChooser {
 	String openTitle = "Open"
 	String saveTitle = "Save"
 
-	def createFileChooser = { useNative ->
-		if (useNative) {
+    //
+    // JFileChooser facade constructors
+    //
+
+    public SelectableFileChooser() {
+        this.app = ApplicationHolder.application
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser()
+    }
+
+    public SelectableFileChooser(File currentDirectory) {
+        this.app = ApplicationHolder.application
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(currentDirectory: currentDirectory)
+    }
+
+    public SelectableFileChooser(File currentDirectory, FileSystemView fsv) {
+        this.app = ApplicationHolder.application
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(currentDirectory: currentDirectory, fileSystemView: fsv)
+    }
+
+    public SelectableFileChooser(String currentDirectoryPath) {
+        this.app = ApplicationHolder.application
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectory)
+    }
+
+    public SelectableFileChooser(String currentDirectoryPath, FileSystemView fsv) {
+        this.app = ApplicationHolder.application
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectory, fileSystemView: fsv)
+    }
+
+    //
+    // original constructors
+    //
+
+    public SelectableFileChooser(GriffonApplication app, JFrame frame) {
+        this.app = app
+        this.frame = frame
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(this.useNativeDialog)
+    }
+
+
+    public SelectableFileChooser(GriffonApplication app, JPanel panel) {
+        this.app = app
+        this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
+        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(this.useNativeDialog)
+    }
+
+    public SelectableFileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
+        this.app = app
+        this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
+        this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
+        this.fileChooser = createFileChooser(this.useNativeDialog)
+
+        if (dirOnly) {
+            this.chooseDirOnly = true
+            def commonPrepareOpen = this.prepareOpen.clone()
+            def commonAfterReturn = this.afterReturn.clone()
+            if (this.useNativeDialog) {
+                prepareOpen = {
+                    if (GriffonApplicationUtils.isMacOSX()) {
+                        System.setProperty( "apple.awt.fileDialogForDirectories", "true" )
+                    }
+                    commonPrepareOpen()
+                }
+                afterReturn = { result ->
+                    commonAfterReturn(result)
+                    if (GriffonApplicationUtils.isMacOSX()) {
+                        System.setProperty( "apple.awt.fileDialogForDirectories", "false" )
+                    }
+                }
+            } else {
+                prepareOpen = {
+                    this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+                    commonPrepareOpen()
+                }
+                afterReturn = { result ->
+                    commonAfterReturn(result)
+                }
+            }
+        }
+    }
+
+    //
+    // Façade to JFileChooser
+    //
+
+    public void setCurrentDirectory(String dir) {
+        if (this.useNativeDialog) {
+            fileChooser.setDirectory(dir)
+        } else {
+            fileChooser.setCurrentDirectory(new File(dir))
+        }
+    }
+
+    public void setCurrentDirectory(File dir) {
+        if (this.useNativeDialog) {
+            fileChooser.setDirectory(dir.canonicalPath)
+        } else {
+            fileChooser.setCurrentDirectory(dir)
+        }
+    }
+
+    //
+    // SelectableFileChooser internals
+    //
+
+    def createFileChooser = { args ->
+		if (useNativeDialog) {
 			// defaults to open file dialog
 			this.fileChooser = new FileDialog(frame, this.openTitle)
 			this.prepareOpen = {}
@@ -35,7 +157,17 @@ public class SelectableFileChooser {
 				}
 			}
 		} else {
-			this.fileChooser = new JFileChooser()
+            if (args.currentDirectory && args.fileSystemView) {
+                this.fileChooser = new JFileChooser(args.currentDirectory, args.fileSystemView)
+            } else if (args.currentDirectory) {
+                this.fileChooser = new JFileChooser(args.currentDirectory)
+            } else if (args.currentDirectoryPath && args.fileSystemView) {
+                this.fileChooser = new JFileChooser(args.currentDirectoryPath, args.fileSystemView)
+            } else if (args.currentDirectoryPath) {
+                this.fileChooser = new JFileChooser(args.currentDirectoryPath)
+            } else {
+                this.fileChooser = new JFileChooser()
+            }
 			this.prepareOpen = {}
 			this.afterReturn = { result ->
 				this.app.log.debug "afterReturn closure called with result = ${result}"
@@ -52,77 +184,12 @@ public class SelectableFileChooser {
 
     public void configure () {
         this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(this.useNativeDialog)
+        this.fileChooser = createFileChooser()
     }
 
-    public SelectableFileChooser() {
-    }
-
-    public SelectableFileChooser(GriffonApplication app, JFrame frame) {
-        this.app = app
-        this.frame = frame
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(this.useNativeDialog)
-    }
-
-
-	public SelectableFileChooser(GriffonApplication app, JPanel panel) {
-		this.app = app
-		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
-		this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-		this.fileChooser = createFileChooser(this.useNativeDialog)
-	}
-
-	public SelectableFileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
-		this.app = app
-		this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
-		this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
-		this.fileChooser = createFileChooser(this.useNativeDialog)
-
-		if (dirOnly) {
-			this.chooseDirOnly = true
-			def commonPrepareOpen = this.prepareOpen.clone()
-			def commonAfterReturn = this.afterReturn.clone()
-			if (this.useNativeDialog) {
-				prepareOpen = { 
-					if (GriffonApplicationUtils.isMacOSX()) {
-						System.setProperty( "apple.awt.fileDialogForDirectories", "true" )
-					}
-					commonPrepareOpen()
-				}
-				afterReturn = { result ->
-					commonAfterReturn(result)
-					if (GriffonApplicationUtils.isMacOSX()) {
-						System.setProperty( "apple.awt.fileDialogForDirectories", "false" )
-					}
-				}
-			} else {
-				prepareOpen = { 
-					this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY) 
-					commonPrepareOpen()
-				}
-				afterReturn = { result ->
-					commonAfterReturn(result)
-				}
-			}
-		}
-	}
-		
-	public void setCurrentDirectory(String dir) {
-		if (this.useNativeDialog) {
-			fileChooser.setDirectory(dir)
-		} else {
-			fileChooser.setCurrentDirectory(new File(dir))
-		}
-	}
-	
-	public void setCurrentDirectory(File dir) {
-		if (this.useNativeDialog) {
-			fileChooser.setDirectory(dir.canonicalPath)
-		} else {
-			fileChooser.setCurrentDirectory(dir)
-		}
-	}
+    //
+    // Convenience methods for simplified API of open and save file dialogs
+    //
 
 	public void chooseFileToOpen(startDir = null) {
 		if (startDir) {
