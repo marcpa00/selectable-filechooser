@@ -2,6 +2,7 @@ package ca.marcpa
 
 import griffon.core.GriffonApplication
 import griffon.util.GriffonApplicationUtils
+import griffon.util.ApplicationHolder
 import griffon.swing.WindowManager
  
 import java.awt.*
@@ -57,36 +58,36 @@ public class SelectableFileChooser {
     public SelectableFileChooser(String currentDirectoryPath) {
         this.app = ApplicationHolder.application
         this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectory)
+        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath)
     }
 
     public SelectableFileChooser(String currentDirectoryPath, FileSystemView fsv) {
         this.app = ApplicationHolder.application
         this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectory, fileSystemView: fsv)
+        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath, fileSystemView: fsv)
     }
 
     //
-    // original constructors
+    // Non-facade constructors
     //
 
-    public SelectableFileChooser(GriffonApplication app, JFrame frame) {
-        this.app = app
+    public SelectableFileChooser(JFrame frame) {
+        this.app = ApplicationHolder.application
         this.frame = frame
         this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
         this.fileChooser = createFileChooser(this.useNativeDialog)
     }
 
 
-    public SelectableFileChooser(GriffonApplication app, JPanel panel) {
-        this.app = app
+    public SelectableFileChooser(JPanel panel) {
+        this.app = ApplicationHolder.application
         this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
         this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
         this.fileChooser = createFileChooser(this.useNativeDialog)
     }
 
-    public SelectableFileChooser(GriffonApplication app, JPanel panel, boolean dirOnly) {
-        this.app = app
+    public SelectableFileChooser(JPanel panel, boolean dirOnly) {
+        this.app = ApplicationHolder.application
         this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
         this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
         this.fileChooser = createFileChooser(this.useNativeDialog)
@@ -145,11 +146,27 @@ public class SelectableFileChooser {
     //
 
     def createFileChooser = { args ->
-		if (useNativeDialog) {
+        if (this.useNativeDialog) { 
+            /*this.app.log.debug*/ println "createFileChooser using native (java.awt) dialog."
+        } else {
+            /*this.app.log.debug*/ println "createFileChooser using pure-java (javax.swing) file chooser."
+        }
+		if (this.useNativeDialog) {
+            if (! this.frame) {
+                if (! this.app) {
+                    this.app = ApplicationHolder.application
+                }
+                this.frame = this.app.windowManager.startingWindow
+            }
 			// defaults to open file dialog
 			this.fileChooser = new FileDialog(frame, this.openTitle)
+            if (args?.currentDirectory) {
+                this.fileChooser.directory = args.currentDirectory.canonicalFile
+            } else if (args?.currentDirectoryPath) {
+                this.fileChooser.directory = args.currentDirectoryPath
+            }
 			this.prepareOpen = {}
-			this.afterReturn = { result -> 
+			this.afterReturn = { result ->
 				if (this.fileChooser.getFile() != null) {
 					this.filename = this.fileChooser.file
 					this.dirname = this.fileChooser.directory
@@ -157,13 +174,13 @@ public class SelectableFileChooser {
 				}
 			}
 		} else {
-            if (args.currentDirectory && args.fileSystemView) {
+            if (args && args.currentDirectory && args.fileSystemView) {
                 this.fileChooser = new JFileChooser(args.currentDirectory, args.fileSystemView)
-            } else if (args.currentDirectory) {
+            } else if (args && args.currentDirectory) {
                 this.fileChooser = new JFileChooser(args.currentDirectory)
-            } else if (args.currentDirectoryPath && args.fileSystemView) {
+            } else if (args && args.currentDirectoryPath && args.fileSystemView) {
                 this.fileChooser = new JFileChooser(args.currentDirectoryPath, args.fileSystemView)
-            } else if (args.currentDirectoryPath) {
+            } else if (args && args.currentDirectoryPath) {
                 this.fileChooser = new JFileChooser(args.currentDirectoryPath)
             } else {
                 this.fileChooser = new JFileChooser()
@@ -182,18 +199,13 @@ public class SelectableFileChooser {
 		this.fileChooser
 	}
 
-    public void configure () {
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser()
-    }
-
     //
     // Convenience methods for simplified API of open and save file dialogs
     //
 
 	public void chooseFileToOpen(startDir = null) {
 		if (startDir) {
-			this.setCurrentDirectory(startDir)
+            setCurrentDirectory(startDir)
 		}
 		this.prepareOpen()
 		def result
@@ -209,7 +221,7 @@ public class SelectableFileChooser {
 	
 	public void chooseFileToSave(startDir = null) {
 		if (startDir) {
-			this.setCurrentDirectory(startDir)
+            setCurrentDirectory(startDir)
 		}
 		this.prepareOpen()
 		def result
