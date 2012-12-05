@@ -4,12 +4,35 @@ class SelectableFilechooserGriffonAddon {
     // lifecycle methods
 
     // called once, after the addon is created
-    //void addonInit(GriffonApplication app) {
-    //}
+    void addonInit(GriffonApplication app) {
+        println "in addonInit()"
+    }
 
     // called once, after all addons have been inited
-    //void addonPostInit(GriffonApplication app) {
-    //}
+    void addonPostInit(GriffonApplication app) {
+        println "in addonPostInit(); app:${app}"
+        println "platform : ${griffon.util.GriffonApplicationUtils.platform}"
+        switch (griffon.util.GriffonApplicationUtils.platform) {
+            case 'linux' :
+            case 'solaris' :
+                app.config.selectableFileChooser.useNative.file = false
+                app.config.selectableFileChooser.useNative.directory = false
+                break;
+            case 'macosx' :
+            case 'macosx64':
+                app.config.selectableFileChooser.useNative.file = true
+                app.config.selectableFileChooser.useNative.directory = true
+                break;
+            case 'windows' :
+                app.config.selectableFileChooser.useNative.file = true
+                app.config.selectableFileChooser.useNative.directory = false
+                break;
+            default: break;
+        }
+
+        println "app.config.selectableFileChooser.useNative.file:${app.config.selectableFileChooser.useNative.file}"
+        println "app.config.selectableFileChooser.useNative.directory:${app.config.selectableFileChooser.useNative.directory}"
+    }
 
     // called many times, after creating a builder
     //void addonBuilderInit(GriffonApplication app, FactoryBuilderSupport builder) {
