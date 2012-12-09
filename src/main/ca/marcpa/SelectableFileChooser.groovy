@@ -1,10 +1,5 @@
 package ca.marcpa
 
-import griffon.core.GriffonApplication
-import griffon.util.GriffonApplicationUtils
-import griffon.util.ApplicationHolder
-import griffon.swing.WindowManager
- 
 import java.awt.*
 import javax.swing.*
 import javax.swing.filechooser.FileSystemView;
@@ -27,7 +22,7 @@ public class SelectableFileChooser {
 	Frame frame
 	String filename
 	String dirname
-	File file
+	File selectedFile
 	Closure prepareOpen
 	Closure afterReturn
 	String openTitle = "Open"

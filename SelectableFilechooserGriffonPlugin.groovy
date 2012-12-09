@@ -56,8 +56,8 @@ myDirChooser = new SelectableFileChooser(app, mainPanel, true)
 def openFile = { evt = null ->
     view.myFileChooser.chooseFileToOpen()
 
-   if (view.myFileChooser.file != null) {
-        String fileText = view.myFileChooser.file.text
+   if (view.myFileChooser.selectedFile != null) {
+        String fileText = view.myFileChooser.selectedFile.text
 
         ...
    }
@@ -65,8 +65,8 @@ def openFile = { evt = null ->
 
 def openDir = { evt = null ->
     view.myDirChooser.chooseFileToOpen(model.dirToOpen)
-    if (view.dirChooserWindow.file != null) {
-        String dirPath = view.dirChooserWindow.file.canonicalPath
+    if (view.dirChooserWindow.selectedFile != null) {
+        String dirPath = view.dirChooserWindow.selectedFile.canonicalPath
     }
     ...
 }
