@@ -163,10 +163,14 @@ public class SelectableFileChooser {
 			this.prepareOpen = {}
 			this.afterReturn = { result ->
 				if (this.fileChooser.getFile() != null) {
-					this.filename = this.fileChooser.file
+                    result = JFileChooser.APPROVE_OPTION
 					this.dirname = this.fileChooser.directory
-					this.file = new File("${this.dirname}/${this.filename}")
+					this.selectedFile = new File("${this.dirname}/${this.filename}")
+
+				} else {
+                    result = JFileChooser.CANCEL_OPTION
 				}
+                result
 			}
 		} else {
             if (args && args.currentDirectory && args.fileSystemView) {
@@ -185,10 +189,11 @@ public class SelectableFileChooser {
 				this.app.log.debug "afterReturn closure called with result = ${result}"
 				if (JFileChooser.APPROVE_OPTION == result) {
 					this.app.log.debug "fileChooser.selectedFile is '${fileChooser.selectedFile}'"
-					this.file = fileChooser.selectedFile
-					this.filename = this.file.name
-					this.dirname = this.file.canonicalFile.parent
+					this.selectedFile = fileChooser.selectedFile
+					this.filename = this.selectedFile.name
+					this.dirname = this.selectedFile.canonicalFile.parent
 				}
+                result
 			}
 		}
 		this.fileChooser
@@ -198,7 +203,7 @@ public class SelectableFileChooser {
     // Convenience methods for simplified API of open and save file dialogs
     //
 
-	public void chooseFileToOpen(startDir = null) {
+	public int chooseFileToOpen(startDir = null) {
 		if (startDir) {
             setCurrentDirectory(startDir)
 		}
@@ -214,7 +219,7 @@ public class SelectableFileChooser {
 		this.afterReturn(result)
 	}
 	
-	public void chooseFileToSave(startDir = null) {
+	public int chooseFileToSave(startDir = null) {
 		if (startDir) {
             setCurrentDirectory(startDir)
 		}
