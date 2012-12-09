@@ -5,13 +5,10 @@ class SelectableFilechooserGriffonAddon {
 
     // called once, after the addon is created
     void addonInit(GriffonApplication app) {
-        println "in addonInit()"
     }
 
     // called once, after all addons have been inited
     void addonPostInit(GriffonApplication app) {
-        println "in addonPostInit(); app:${app}"
-        println "platform : ${griffon.util.GriffonApplicationUtils.platform}"
         switch (griffon.util.GriffonApplicationUtils.platform) {
             case 'linux' :
             case 'solaris' :
@@ -29,9 +26,6 @@ class SelectableFilechooserGriffonAddon {
                 break;
             default: break;
         }
-
-        println "app.config.selectableFileChooser.useNative.file:${app.config.selectableFileChooser.useNative.file}"
-        println "app.config.selectableFileChooser.useNative.directory:${app.config.selectableFileChooser.useNative.directory}"
     }
 
     // called many times, after creating a builder
