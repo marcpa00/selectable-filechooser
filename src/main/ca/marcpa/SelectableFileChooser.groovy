@@ -167,11 +167,11 @@ public class SelectableFileChooser {
             }
 			this.prepareOpen = {}
 			this.afterReturn = { result ->
-				if (this.fileChooser.getFile() != null) {
+				if (this.fileChooser.file != null) {
                     result = JFileChooser.APPROVE_OPTION
 					this.dirname = this.fileChooser.directory
+                    this.filename = this.fileChooser.file
 					this.selectedFile = new File("${this.dirname}/${this.filename}")
-
 				} else {
                     result = JFileChooser.CANCEL_OPTION
                 }
