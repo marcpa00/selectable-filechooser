@@ -100,41 +100,11 @@ public class SelectableFileChooser {
         this.app = ApplicationHolder.application
         this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
         this.fileChooser = createFileChooser(dirOnly: dirOnly)
-
-        /*
-                if (dirOnly) {
-                    this.chooseDirOnly = true
-                    def commonPrepareOpen = this.prepareOpen.clone()
-                    def commonAfterReturn = this.afterReturn.clone()
-                    if (this.useNativeDialog) {
-                        prepareOpen = {
-                            if (GriffonApplicationUtils.isMacOSX()) {
-                                System.setProperty( "apple.awt.fileDialogForDirectories", "true" )
-                            }
-                            commonPrepareOpen()
-                        }
-                        afterReturn = { result ->
-                            commonAfterReturn(result)
-                            if (GriffonApplicationUtils.isMacOSX()) {
-                                System.setProperty( "apple.awt.fileDialogForDirectories", "false" )
-                            }
-                            result
-                        }
-                    } else {
-                        prepareOpen = {
-                            this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
-                            commonPrepareOpen()
-                        }
-                        afterReturn = { result ->
-                            commonAfterReturn(result)
-                        }
-                    }
-        */
     }
 
-//
-// Façade to JFileChooser
-//
+    //
+    // Façade to JFileChooser
+    //
 
     public void setCurrentDirectory(String dir) {
         if (this.useNativeDialog) {
@@ -152,9 +122,9 @@ public class SelectableFileChooser {
         }
     }
 
-//
-// SelectableFileChooser internals
-//
+    //
+    // SelectableFileChooser internals
+    //
 
     Closure nativeFilePrepareOpen = {}
     Closure nativeFileAfterReturn = { result ->
@@ -256,21 +226,6 @@ public class SelectableFileChooser {
             } else if (args?.currentDirectoryPath) {
                 this.fileChooser.directory = args.currentDirectoryPath
             }
-
-/*
-			this.prepareOpen = {}
-			this.afterReturn = { result ->
-				if (this.fileChooser.file != null) {
-                    result = JFileChooser.APPROVE_OPTION
-					this.dirname = this.fileChooser.directory
-                    this.filename = this.fileChooser.file
-					this.selectedFile = new File("${this.dirname}/${this.filename}")
-				} else {
-                    result = JFileChooser.CANCEL_OPTION
-                }
-                result
-			}
-*/
         } else {
             if (args && args.currentDirectory && args.fileSystemView) {
                 this.fileChooser = new JFileChooser(args.currentDirectory, args.fileSystemView)
@@ -283,27 +238,14 @@ public class SelectableFileChooser {
             } else {
                 this.fileChooser = new JFileChooser()
             }
-/*
-			this.prepareOpen = {}
-			this.afterReturn = { result ->
-				this.app.log.debug "afterReturn closure called with result = ${result}"
-				if (JFileChooser.APPROVE_OPTION == result) {
-					this.app.log.debug "fileChooser.selectedFile is '${fileChooser.selectedFile}'"
-					this.selectedFile = fileChooser.selectedFile
-					this.filename = this.selectedFile.name
-					this.dirname = this.selectedFile.canonicalFile.parent
-				}
-                result
-			}
-*/
         }
         configureClosures()
         this.fileChooser
     }
 
-//
-// Convenience methods for simplified API of open and save file dialogs
-//
+    //
+    // Convenience methods for simplified API of open and save file dialogs
+    //
 
     public int chooseFileToOpen(startDir = null) {
         if (startDir) {
