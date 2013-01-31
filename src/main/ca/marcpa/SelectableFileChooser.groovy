@@ -40,52 +40,59 @@ public class SelectableFileChooser {
     //
 
     public SelectableFileChooser() {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser()
+        app = ApplicationHolder.application
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser()
     }
 
     public SelectableFileChooser(File currentDirectory) {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectory: currentDirectory)
+        app = ApplicationHolder.application
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(currentDirectory: currentDirectory)
     }
 
     public SelectableFileChooser(File currentDirectory, FileSystemView fsv) {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectory: currentDirectory, fileSystemView: fsv)
+        app = ApplicationHolder.application
+        tiveDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(currentDirectory: currentDirectory, fileSystemView: fsv)
     }
 
     public SelectableFileChooser(String currentDirectoryPath) {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath)
+        app = ApplicationHolder.application
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath)
     }
 
     public SelectableFileChooser(String currentDirectoryPath, FileSystemView fsv) {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath, fileSystemView: fsv)
+        app = ApplicationHolder.application
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(currentDirectoryPath: currentDirectoryPath, fileSystemView: fsv)
     }
 
     //
     // Non-facade constructors
     //
 
+    public SelectableFileChooser(Map args) {
+        if (! args) { args = [:] }
+        app = args.app ?: ApplicationHolder.application
+        fileChooser = createFileChooser(args)
+
+    }
+
     public SelectableFileChooser(JFrame frame) {
-        this.app = ApplicationHolder.application
-        this.frame = frame
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(this.useNativeDialog)
+        app = ApplicationHolder.application
+        frame = frame
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(useNativeDialog)
     }
 
 
     public SelectableFileChooser(JPanel panel) {
-        this.app = ApplicationHolder.application
-        this.frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
-        this.useNativeDialog = this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(this.useNativeDialog)
+        app = ApplicationHolder.application
+        frame = SwingUtilities.getAncestorOfClass(Frame.class, panel)
+        useNativeDialog = app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(useNativeDialog)
     }
 
     /**
@@ -96,10 +103,10 @@ public class SelectableFileChooser {
      *
      * @param dirOnly
      */
-    public SelectableFileChooser(boolean dirOnly) {
-        this.app = ApplicationHolder.application
-        this.useNativeDialog = dirOnly ? this.app.config.selectableFileChooser.useNative.directory : this.app.config.selectableFileChooser.useNative.file
-        this.fileChooser = createFileChooser(dirOnly: dirOnly)
+    public SelectableFileChooser(Boolean dirOnly) {
+        app = ApplicationHolder.application
+        useNativeDialog = dirOnly ? app.config.selectableFileChooser.useNative.directory : app.config.selectableFileChooser.useNative.file
+        fileChooser = createFileChooser(dirOnly: dirOnly)
     }
 
     //
@@ -107,7 +114,7 @@ public class SelectableFileChooser {
     //
 
     public void setCurrentDirectory(String dir) {
-        if (this.useNativeDialog) {
+        if (useNativeDialog) {
             fileChooser.setDirectory(dir)
         } else {
             fileChooser.setCurrentDirectory(new File(dir))
@@ -115,7 +122,7 @@ public class SelectableFileChooser {
     }
 
     public void setCurrentDirectory(File dir) {
-        if (this.useNativeDialog) {
+        if (useNativeDialog) {
             fileChooser.setDirectory(dir.canonicalPath)
         } else {
             fileChooser.setCurrentDirectory(dir)
@@ -128,11 +135,11 @@ public class SelectableFileChooser {
 
     Closure nativeFilePrepareOpen = {}
     Closure nativeFileAfterReturn = { result ->
-        if (this.fileChooser.file != null) {
+        if (fileChooser.file != null) {
             result = JFileChooser.APPROVE_OPTION
-            this.dirname = this.fileChooser.directory
-            this.filename = this.fileChooser.file
-            this.selectedFile = new File("${this.dirname}/${this.filename}")
+            dirname = fileChooser.directory
+            filename = fileChooser.file
+            selectedFile = new File("${dirname}/${filename}")
         } else {
             result = JFileChooser.CANCEL_OPTION
         }
@@ -141,12 +148,12 @@ public class SelectableFileChooser {
 
     Closure pureFilePrepareOpen = {}
     Closure pureFileAfterReturn = { result ->
-        this.app.log.debug "afterReturn closure called with result = ${result}"
+        app.log.debug "afterReturn closure called with result = ${result}"
         if (JFileChooser.APPROVE_OPTION == result) {
-            this.app.log.debug "fileChooser.selectedFile is '${fileChooser.selectedFile}'"
-            this.selectedFile = fileChooser.selectedFile
-            this.filename = this.selectedFile.name
-            this.dirname = this.selectedFile.canonicalFile.parent
+            app.log.debug "fileChooser.selectedFile is '${fileChooser.selectedFile}'"
+            selectedFile = fileChooser.selectedFile
+            filename = selectedFile.name
+            dirname = selectedFile.canonicalFile.parent
         }
         result
     }
@@ -167,80 +174,72 @@ public class SelectableFileChooser {
     }
 
     Closure pureDirectoryPrepareOpen = {
-        this.previousFileSelectionMode = this.fileChooser.getFileSelectionMode()
-        this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+        previousFileSelectionMode = fileChooser.getFileSelectionMode()
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
         pureFilePrepareOpen()
     }
 
     Closure pureDirectoryAfterReturn = { result ->
         def innerResult = pureFileAfterReturn(result)
-        this.fileChooser.setFileSelectionMode(this.previousFileSelectionMode)
+        fileChooser.setFileSelectionMode(previousFileSelectionMode)
         innerResult
     }
 
     void configureClosures() {
         if (useNativeDialog) {
-            if (this.chooseDirOnly) {
-                this.prepareOpen = nativeDirectoryPrepareOpen
-                this.afterReturn = nativeDirectoryAfterReturn
+            if (chooseDirOnly) {
+                prepareOpen = nativeDirectoryPrepareOpen
+                afterReturn = nativeDirectoryAfterReturn
             } else {
-                this.prepareOpen = nativeFilePrepareOpen
-                this.afterReturn = nativeFileAfterReturn
+                prepareOpen = nativeFilePrepareOpen
+                afterReturn = nativeFileAfterReturn
             }
         } else {
-            if (this.chooseDirOnly) {
-                this.prepareOpen = pureDirectoryPrepareOpen
-                this.afterReturn = pureDirectoryAfterReturn
+            if (chooseDirOnly) {
+                prepareOpen = pureDirectoryPrepareOpen
+                afterReturn = pureDirectoryAfterReturn
             } else {
-                this.prepareOpen = pureFilePrepareOpen
-                this.afterReturn = pureFileAfterReturn
+                prepareOpen = pureFilePrepareOpen
+                afterReturn = pureFileAfterReturn
             }
         }
     }
 
-    def createFileChooser = { args ->
-        if (args.contains("useNativeDialog")) {
-            this.useNativeDialog = args.useNativeDialog
-        }
-        if (this.useNativeDialog) {
-            /*this.app.log.debug*/ println "createFileChooser using native (java.awt) dialog."
+    def createFileChooser = { args = [:] ->
+        useNativeDialog = args.useNativeDialog ?: (useNativeDialog ?: false)
+        if (useNativeDialog) {
+            app.log.debug "createFileChooser using native (java.awt) dialog."
         } else {
-            /*this.app.log.debug*/ println "createFileChooser using pure-java (javax.swing) file chooser."
+            app.log.debug "createFileChooser using pure-java (javax.swing) file chooser."
         }
 
-        if (args.contains("dirOnly")) {
-            this.chooseDirOnly = args.dirOnly
-        }
-        if (this.useNativeDialog) {
-            if (!this.frame) {
-                if (!this.app) {
-                    this.app = ApplicationHolder.application
+        chooseDirOnly = args.dirOnly ?: (chooseDirOnly ?: false)
+        if (useNativeDialog) {
+
+            if (!frame) {
+                if (!app) {
+                    app = ApplicationHolder.application
                 }
-                this.frame = this.app.windowManager.startingWindow
-
+                frame = app.windowManager.startingWindow
             }
             // defaults to open file dialog
-            this.fileChooser = new FileDialog(frame, this.openTitle)
-            if (args?.currentDirectory) {
-                this.fileChooser.directory = args.currentDirectory.canonicalFile
-            } else if (args?.currentDirectoryPath) {
-                this.fileChooser.directory = args.currentDirectoryPath
-            }
+            fileChooser = new FileDialog(frame, openTitle)
+            fileChooser.directory = args.currentDirectory?.canonicalFile ?: args.currentDirectoryPath
         } else {
-            if (args && args.currentDirectory && args.fileSystemView) {
-                this.fileChooser = new JFileChooser(args.currentDirectory, args.fileSystemView)
-            } else if (args && args.currentDirectory) {
-                this.fileChooser = new JFileChooser(args.currentDirectory)
-            } else if (args && args.currentDirectoryPath && args.fileSystemView) {
-                this.fileChooser = new JFileChooser(args.currentDirectoryPath, args.fileSystemView)
-            } else if (args && args.currentDirectoryPath) {
-                this.fileChooser = new JFileChooser(args.currentDirectoryPath)
+            if (args.currentDirectory && args.fileSystemView) {
+                fileChooser = new JFileChooser(args.currentDirectory, args.fileSystemView)
+            } else if (args.currentDirectory) {
+                fileChooser = new JFileChooser(args.currentDirectory)
+            } else if (args.currentDirectoryPath && args.fileSystemView) {
+                fileChooser = new JFileChooser(args.currentDirectoryPath, args.fileSystemView)
+            } else if (args.currentDirectoryPath) {
+                fileChooser = new JFileChooser(args.currentDirectoryPath)
             } else {
-                this.fileChooser = new JFileChooser()
+                fileChooser = new JFileChooser()
             }
         }
         configureClosures()
-        this.fileChooser
+        fileChooser
     }
 
     //
@@ -252,17 +251,17 @@ public class SelectableFileChooser {
             setCurrentDirectory(startDir)
         }
         configureClosures()
-        this.prepareOpen()
+        prepareOpen()
         def result
-        if (this.useNativeDialog) {
-            this.fileChooser.setMode(FileDialog.LOAD)
-            this.fileChooser.setTitle(this.openTitle)
-            this.fileChooser.setVisible(true)
+        if (useNativeDialog) {
+            fileChooser.setMode(FileDialog.LOAD)
+            fileChooser.setTitle(openTitle)
+            fileChooser.setVisible(true)
         } else {
             // TODO : title ?
-            result = this.fileChooser.showOpenDialog(this.frame)
+            result = fileChooser.showOpenDialog(frame)
         }
-        this.afterReturn(result)
+        afterReturn(result)
     }
 
     public int chooseFileToSave(startDir = null) {
@@ -270,17 +269,17 @@ public class SelectableFileChooser {
             setCurrentDirectory(startDir)
         }
         configureClosures()
-        this.prepareOpen()
+        prepareOpen()
         def result
-        if (this.useNativeDialog) {
-            this.fileChooser.setMode(FileDialog.SAVE)
-            this.fileChooser.setTitle(this.saveTitle)
-            this.fileChooser.setVisible(true)
+        if (useNativeDialog) {
+            fileChooser.setMode(FileDialog.SAVE)
+            fileChooser.setTitle(saveTitle)
+            fileChooser.setVisible(true)
         } else {
             // TODO : title ?
-            result = this.fileChooser.showSaveDialog(this.frame)
+            result = fileChooser.showSaveDialog(frame)
         }
-        this.afterReturn(result)
+        afterReturn(result)
     }
 
     public int chooseDir(startDir = null) {
@@ -288,18 +287,18 @@ public class SelectableFileChooser {
             setCurrentDirectory(startDir)
         }
         configureClosures()
-        this.prepareOpen()
+        prepareOpen()
         def result
-        if (this.useNativeDialog) {
-            this.fileChooser.setMode(FileDialog.LOAD)
-            this.fileChooser.setTitle(this.openDirectoryTitle)
-            this.fileChooser.setVisible(true)
+        if (useNativeDialog) {
+            fileChooser.setMode(FileDialog.LOAD)
+            fileChooser.setTitle(openDirectoryTitle)
+            fileChooser.setVisible(true)
         } else {
             // TODO: find how to set the title for swing dialog
-            result = this.fileChooser.showOpenDialog(this.frame)
+            result = fileChooser.showOpenDialog(frame)
 
         }
-        this.afterReturn(result)
+        afterReturn(result)
 
     }
 }
