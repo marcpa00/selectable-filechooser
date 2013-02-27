@@ -1,13 +1,32 @@
 package ca.marcpa
 
+/**
+ * Copyright 2013 Marc Paquette
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import javax.swing.*
+import javax.swing.filechooser.FileSystemView
+import java.awt.*
 import griffon.core.GriffonApplication
 import griffon.util.GriffonApplicationUtils
 import griffon.util.ApplicationHolder
-import griffon.swing.WindowManager
 
-import java.awt.*
-import javax.swing.*
-import javax.swing.filechooser.FileSystemView;
+import static javax.swing.JFileChooser.APPROVE_OPTION
+import static javax.swing.JFileChooser.CANCEL_OPTION
+import static javax.swing.JFileChooser.DIRECTORIES_ONLY
+import static javax.swing.JFileChooser.FILES_ONLY
 
 /**
  * A SelectableFileChooser is somewhat similar to a Swing JFileChooser API-wise but can possibly be implemented with
@@ -15,7 +34,8 @@ import javax.swing.filechooser.FileSystemView;
  * of running application.
  * The config of plugin have default values for selection of native vs Swing according to the operating platform.
  *
- * Basically, where one used a JFileChooser constructor before, one can use a ca.marcpa.SelectableFileChooser constructor.
+ * Basically, where one used a JFileChooser constructor before, one can use a ca.marcpa.SelectableFileChooser constructor
+ * instead and use common JFileChooser-like methods to interact with it.
  *
  */
 public class SelectableFileChooser {
@@ -28,7 +48,7 @@ public class SelectableFileChooser {
     String filename
     String dirname
     File selectedFile
-    int previousFileSelectionMode = JFileChooser.FILES_ONLY
+    int previousFileSelectionMode = FILES_ONLY
     Closure prepareOpen
     Closure afterReturn
     String openTitle = "Open"
@@ -96,7 +116,7 @@ public class SelectableFileChooser {
     }
 
     /**
-     * Create a SelectableFileChooser, native of pure (Swing) according to plateform.  If dirOnly is true, the file chooser is configured
+     * Create a SelectableFileChooser, native of pure (Swing) according to platform.  If dirOnly is true, the file chooser is configured
      * to select directories only.
      *
      * @limitation Depending on the underlying implementation of the actual component, directory selection may not be supported.
@@ -133,15 +153,27 @@ public class SelectableFileChooser {
     // SelectableFileChooser internals
     //
 
+
+
+    /**
+     * Closures to controls behavior along the dimensions native/pure, file/directory, prepare/after.
+     *
+     * A pair of closures are defined for preparing the opening of the dialog (prepareOpen) and
+     * for acting on what was choosen by the user (afterReturn).  The pairs operate along 2 dimensions :
+     * native and pure-java, file and directory.
+     *
+     * Therefore, there are 8 closures in total.
+     */
+
     Closure nativeFilePrepareOpen = {}
     Closure nativeFileAfterReturn = { result ->
         if (fileChooser.file != null) {
-            result = JFileChooser.APPROVE_OPTION
+            result = APPROVE_OPTION
             dirname = fileChooser.directory
             filename = fileChooser.file
             selectedFile = new File("${dirname}/${filename}")
         } else {
-            result = JFileChooser.CANCEL_OPTION
+            result = CANCEL_OPTION
         }
         result
     }
@@ -149,7 +181,7 @@ public class SelectableFileChooser {
     Closure pureFilePrepareOpen = {}
     Closure pureFileAfterReturn = { result ->
         app.log.debug "afterReturn closure called with result = ${result}"
-        if (JFileChooser.APPROVE_OPTION == result) {
+        if (APPROVE_OPTION == result) {
             app.log.debug "fileChooser.selectedFile is '${fileChooser.selectedFile}'"
             selectedFile = fileChooser.selectedFile
             filename = selectedFile.name
@@ -175,7 +207,7 @@ public class SelectableFileChooser {
 
     Closure pureDirectoryPrepareOpen = {
         previousFileSelectionMode = fileChooser.getFileSelectionMode()
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+        fileChooser.setFileSelectionMode(DIRECTORIES_ONLY)
         pureFilePrepareOpen()
     }
 
@@ -205,6 +237,9 @@ public class SelectableFileChooser {
         }
     }
 
+    /**
+     * Native OR swing file chooser creation
+     */
     def createFileChooser = { args = [:] ->
         useNativeDialog = args.useNativeDialog ?: (useNativeDialog ?: false)
         if (useNativeDialog) {

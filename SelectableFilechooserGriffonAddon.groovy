@@ -1,5 +1,21 @@
 import griffon.core.GriffonApplication
 
+/**
+ * Copyright 2013 Marc Paquette
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 class SelectableFilechooserGriffonAddon {
     // lifecycle methods
 
@@ -8,6 +24,16 @@ class SelectableFilechooserGriffonAddon {
     }
 
     // called once, after all addons have been inited
+    /**
+     * This post init method will set the native or swing value for file and directory choosers according to
+     * "sensible" defaults for each platform :
+     *
+     * - solaris and linux native choosers are minimal; go with the swing one.
+     * - Mac OS X has good native support for both file and directory choosers.
+     * - windows has good native support for file chooser, but directory selection is better handled by swing's chooser.
+     *
+     * @param app
+     */
     void addonPostInit(GriffonApplication app) {
         switch (griffon.util.GriffonApplicationUtils.platform) {
             case 'linux' :
