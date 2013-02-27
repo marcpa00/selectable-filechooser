@@ -4,5 +4,7 @@ staging
 target
 *.jar
 *.class
-*รรร~
+*~
 wrapper
+*.iml
+
