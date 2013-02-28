@@ -6,7 +6,7 @@ similar to JFileChooser (and thus *not* similar to a java.awt.FileDialog).
 
 Usage
 ----
-import com.marcpa.SelectableFileChooser
+import ca.marcpa.SelectableFileChooser
 
 // to override default configuration
 app.config.selectableFileChooser.useNative.file = true
