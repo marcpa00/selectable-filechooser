@@ -55,71 +55,71 @@ similar to JFileChooser (and thus *not* similar to a java.awt.FileDialog).
 
 Usage
 ----
-import com.marcpa.SelectableFileChooser
+        import com.marcpa.SelectableFileChooser
 
-// to override default configuration
-app.config.selectableFileChooser.useNative.file = true
-app.config.selectableFileChooser.useNative.directory = false
-
-...
-
-// In a view script, with a panel child of application into variable mainPanel:
-myFileChooser = new SelectableFileChooser(app, mainPanel)
-myDirChooser = new SelectableFileChooser(app, mainPanel, true)
-
-...
-
-// in a controller 
-def openFile = { evt = null ->
-    view.myFileChooser.chooseFileToOpen()
-
-   if (view.myFileChooser.selectedFile != null) {
-        String fileText = view.myFileChooser.selectedFile.text
+        // to override default configuration
+        app.config.selectableFileChooser.useNative.file = true
+        app.config.selectableFileChooser.useNative.directory = false
 
         ...
-   }
-}
 
-def openDir = { evt = null ->
-    view.myDirChooser.chooseFileToOpen(model.dirToOpen)
-    if (view.dirChooserWindow.selectedFile != null) {
-        String dirPath = view.dirChooserWindow.selectedFile.canonicalPath
-    }
-    ...
-}
+        // In a view script, with a panel child of application into variable mainPanel:
+        myFileChooser = new SelectableFileChooser(app, mainPanel)
+        myDirChooser = new SelectableFileChooser(app, mainPanel, true)
+
+        ...
+
+        // in a controller
+        def openFile = { evt = null ->
+            view.myFileChooser.chooseFileToOpen()
+
+           if (view.myFileChooser.selectedFile != null) {
+                String fileText = view.myFileChooser.selectedFile.text
+
+                ...
+           }
+        }
+
+        def openDir = { evt = null ->
+            view.myDirChooser.chooseFileToOpen(model.dirToOpen)
+            if (view.dirChooserWindow.selectedFile != null) {
+                String dirPath = view.dirChooserWindow.selectedFile.canonicalPath
+            }
+            ...
+        }
     
 Configuration
 -------------
 
 Default configuration of pluging:
 
-switch (griffon.util.GriffonApplicationUtils.platform) {
-	case 'linux' :
-	case 'solaris' :
-		selectableFileChooser  {
-                useNative {
-                        file = false
-                		directory = false
+        switch (griffon.util.GriffonApplicationUtils.platform) {
+            case 'linux' :
+            case 'solaris' :
+                selectableFileChooser  {
+                        useNative {
+                                file = false
+                                directory = false
+                        }
                 }
-		}
-		break;
-	case 'macosx' :
-		selectableFileChooser  {
-                useNative {
-                        file = true
-                        directory = true
+                break;
+            case 'macosx' :
+                selectableFileChooser  {
+                        useNative {
+                                file = true
+                                directory = true
+                        }
                 }
-		}
-		break;
-	case 'windows' :
-		selectableFileChooser  {
-                useNative {
-                        file = true
-                        directory = false
+                break;
+            case 'windows' :
+                selectableFileChooser  {
+                        useNative {
+                                file = true
+                                directory = false
+                        }
                 }
-		}
-		break;
-	default: break;
+                break;
+            default: break;
 }
 
 '''
